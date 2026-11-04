@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout | RedStore</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+
+    <script src="js/catalogue.js"></script>
+    <script src="js/site.js"></script>
+    <script>
+        RS.dl.pageData({ type: 'checkout', name: 'Checkout' });
+    </script>
+
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-MXQ9HZ7R');</script>
+    <!-- End Google Tag Manager -->
+</head>
+<body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MXQ9HZ7R"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
+    <div class="container"><div id="site-nav"></div></div>
+
+    <div class="small-container checkout-page">
+        <h2>Checkout</h2>
+        <p class="note">Test shop: nothing is validated and no payment is taken, so feel free to leave fields blank.</p>
+
+        <div id="emptyCart" class="empty" hidden>Your cart is empty. Return to <a href="products.html">products</a> to start shopping.</div>
+
+        <div class="checkout-grid" id="checkoutGrid">
+            <div class="checkout-steps">
+                <!-- Step 1: delivery -> add_shipping_info -->
+                <section class="checkout-step" id="stepShipping">
+                    <h3><span class="step-num">1</span> Delivery <button type="button" class="link-btn" id="editShipping" hidden>Edit</button></h3>
+                    <form id="shippingForm" class="checkout-form">
+                        <div class="field-row">
+                            <label>Full name <input type="text" id="fullName" autocomplete="name"></label>
+                            <label>Email <input type="email" id="email" autocomplete="email"></label>
+                        </div>
+                        <label>Address <input type="text" autocomplete="street-address"></label>
+                        <div class="field-row">
+                            <label>Town / City <input type="text" autocomplete="address-level2"></label>
+                            <label>Postcode <input type="text" autocomplete="postal-code"></label>
+                        </div>
+                        <fieldset class="options" id="shippingOptions">
+                            <legend>Delivery method</legend>
+                        </fieldset>
+                        <button type="submit" class="btn">Continue to payment</button>
+                    </form>
+                    <p class="step-summary" id="shippingSummary" hidden></p>
+                </section>
+
+                <!-- Step 2: payment -> add_payment_info, then purchase on the confirmation page -->
+                <section class="checkout-step is-locked" id="stepPayment">
+                    <h3><span class="step-num">2</span> Payment</h3>
+                    <form id="paymentForm" class="checkout-form" hidden>
+                        <fieldset class="options">
+                            <legend>Payment method</legend>
+                            <label class="option"><input type="radio" name="payment" value="Credit Card" checked> Test card <small>(no payment taken)</small></label>
+                            <label class="option"><input type="radio" name="payment" value="PayPal"> PayPal <small>(test - no redirect)</small></label>
+                            <label class="option"><input type="radio" name="payment" value="Pay on Delivery"> Pay on delivery</label>
+                        </fieldset>
+                        <button type="submit" class="btn" id="placeOrder">Place order</button>
+                    </form>
+                </section>
+            </div>
+
+            <aside class="order-summary">
+                <h3>Order summary</h3>
+                <div id="summaryLines"></div>
+                <form id="couponForm" class="coupon-form">
+                    <label for="couponCode">Discount code</label>
+                    <div class="coupon-row">
+                        <input type="text" id="couponCode" placeholder="e.g. 10OFF" autocomplete="off">
+                        <button type="submit" class="btn btn-small">Apply</button>
+                    </div>
+                    <p class="coupon-msg" id="couponMsg" aria-live="polite"></p>
+                </form>
+                <table class="summary-totals" id="summaryTotals"></table>
+            </aside>
+        </div>
+    </div>
+
+    <div id="site-footer"></div>
+
+    <script>
+        (function () {
+            var cart = RS.cart.get();
+            if (!cart.lines.length) {
+                document.getElementById('emptyCart').hidden = false;
+                document.getElementById('checkoutGrid').hidden = true;
+                return;
+            }
+
+            var user = RS.user.get();
+            if (user) document.getElementById('fullName').value = user.username;
+
+            document.getElementById('shippingOptions').insertAdjacentHTML('beforeend', Object.keys(RS.SHIPPING).map(function (key, i) {
+                var opt = RS.SHIPPING[key];
+                return '<label class="option"><input type="radio" name="shipping" value="' + key + '"' + (i === 0 ? ' checked' : '') + '> ' +
+                    opt.label + ' <strong>' + (opt.cost ? RS.money(opt.cost) : 'Free') + '</strong></label>';
+            }).join(''));
+
+            function shippingKey() { return document.querySelector('input[name="shipping"]:checked').value; }
+
+            function summary() {
+                cart = RS.cart.get();
+                return RS.cart.summarise(cart.lines, cart.coupon, shippingKey());
+            }
+
+            function items(s) {
+                return s.lines.map(function (l) {
+                    return RS.dl.item(l.product, { quantity: l.quantity, size: l.size, coupon: s.coupon });
+                });
+            }
+
+            function renderSummary() {
+                var s = summary();
+                document.getElementById('summaryLines').innerHTML = s.lines.map(function (l) {
+                    return '<div class="summary-line" data-item-id="' + l.product.id + '">' +
+                        '<img src="' + l.product.image + '" alt="">' +
+                        '<div><p>' + RS.escape(l.product.name) + '</p>' +
+                        '<small>Size ' + RS.escape(l.size) + ' &middot; ' + l.quantity + ' &times; <span class="js-unit-price">' + RS.money(l.unitPrice) + '</span></small></div>' +
+                        '<span>' + RS.money(l.lineTotal) + '</span>' +
+                    '</div>';
+                }).join('');
+
+                document.getElementById('summaryTotals').innerHTML =
+                    '<tr><td>Subtotal</td><td>' + RS.money(s.subtotal) + '</td></tr>' +
+                    (s.coupon ? '<tr class="discount"><td>Discount (' + s.coupon + ') <button type="button" class="link-btn" id="removeCoupon">remove</button></td><td>&minus;' + RS.money(s.discount) + '</td></tr>' : '') +
+                    '<tr><td>Tax (' + RS.TAX_RATE * 100 + '%)</td><td>' + RS.money(s.tax) + '</td></tr>' +
+                    '<tr><td>Delivery</td><td>' + (s.shipping ? RS.money(s.shipping) : 'Free') + '</td></tr>' +
+                    '<tr class="grand-total"><td>Total</td><td data-order-total>' + RS.money(s.total) + '</td></tr>';
+
+                document.getElementById('couponForm').hidden = !!s.coupon;
+                var remove = document.getElementById('removeCoupon');
+                if (remove) remove.addEventListener('click', function () {
+                    RS.cart.setCoupon(null);
+                    RS.dl.push({ event: 'remove_coupon', coupon: s.coupon });
+                    setCouponMsg('', '');
+                    renderSummary();
+                });
+                return s;
+            }
+
+            function setCouponMsg(text, type) {
+                var el = document.getElementById('couponMsg');
+                el.textContent = text;
+                el.className = 'coupon-msg ' + type;
+            }
+
+            // Discount code
+            document.getElementById('couponForm').addEventListener('submit', function (e) {
+                e.preventDefault();
+                var code = document.getElementById('couponCode').value.trim().toUpperCase();
+                if (!code) return;
+                if (RS.COUPONS[code]) {
+                    RS.cart.setCoupon(code);
+                    RS.dl.push({ event: 'apply_coupon', coupon: code, coupon_status: 'valid' });
+                    setCouponMsg(code + ' applied - ' + RS.COUPONS[code].label, 'ok');
+                } else {
+                    RS.dl.push({ event: 'apply_coupon', coupon: code, coupon_status: 'invalid' });
+                    setCouponMsg('Sorry, "' + code + '" isn\'t a valid code. Try 10OFF.', 'error');
+                }
+                document.getElementById('couponCode').value = '';
+                renderSummary();
+            });
+
+            document.getElementById('shippingOptions').addEventListener('change', renderSummary);
+
+            // Step 1 -> add_shipping_info
+            document.getElementById('shippingForm').addEventListener('submit', function (e) {
+                e.preventDefault();
+                var s = summary();
+                var tier = shippingKey();
+                RS.dl.ecommerce('add_shipping_info', items(s), { shipping_tier: tier, coupon: s.coupon || undefined });
+
+                this.hidden = true;
+                var sum = document.getElementById('shippingSummary');
+                sum.textContent = RS.SHIPPING[tier].label;
+                sum.hidden = false;
+                document.getElementById('editShipping').hidden = false;
+                document.getElementById('stepPayment').classList.remove('is-locked');
+                document.getElementById('paymentForm').hidden = false;
+            });
+
+            document.getElementById('editShipping').addEventListener('click', function () {
+                document.getElementById('shippingForm').hidden = false;
+                document.getElementById('shippingSummary').hidden = true;
+                this.hidden = true;
+            });
+
+            // Step 2 -> add_payment_info, then save the order and go to the confirmation page
+            document.getElementById('paymentForm').addEventListener('submit', function (e) {
+                e.preventDefault();
+                document.getElementById('placeOrder').disabled = true;
+                var s = summary();
+                var paymentType = document.querySelector('input[name="payment"]:checked').value;
+
+                var order = {
+                    transaction_id: 'RS-' + Date.now().toString(36).toUpperCase() + '-' + Math.floor(Math.random() * 1000),
+                    lines: cart.lines,
+                    coupon: s.coupon,
+                    shipping_key: shippingKey(),
+                    payment_type: paymentType,
+                    customer_type: RS.user.orderCount() > 0 ? 'returning' : 'new',
+                    tracked: false
+                };
+                RS.session('rs_last_order', order);
+                RS.local('rs_order_count', RS.user.orderCount() + 1);
+                RS.cart.clear();
+
+                RS.dl.ecommerce('add_payment_info', items(s), { payment_type: paymentType, coupon: s.coupon || undefined }, function () {
+                    window.location.href = 'order-confirmation.html';
+                });
+            });
+
+            var s = renderSummary();
+            RS.dl.ecommerce('begin_checkout', items(s), s.coupon ? { coupon: s.coupon } : {});
+        })();
+    </script>
+</body>
+</html>

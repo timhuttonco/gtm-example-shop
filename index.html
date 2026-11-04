@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RedStore | Ecommerce Website</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+
+    <script src="js/catalogue.js"></script>
+    <script src="js/site.js"></script>
+    <script>
+        RS.dl.pageData({ type: 'home', name: 'Home' });
+    </script>
+
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-MXQ9HZ7R');</script>
+    <!-- End Google Tag Manager -->
+</head>
+<body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MXQ9HZ7R"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
+
+    <div class="header">
+        <div class="container">
+            <div id="site-nav"></div>
+            <div class="row">
+                <div class="col-2">
+                    <h1>Give Your Workout<br>A New Style!</h1>
+                    <p>Success isn't always about greatness. It's about consistency. Consistent<br>hard work gains success. Greatness will come.</p>
+                    <a href="products.html" class="btn">Explore Now &#8594;</a>
+                </div>
+                <div class="col-2">
+                    <img src="images/image1.png" alt="Athlete in RedStore sportswear">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- promotion banner (view_promotion / select_promotion) -->
+    <div class="promo-banner" id="promoBanner">
+        <div class="small-container">
+            <p><strong>Sale now on</strong> - up to 25% off selected lines, plus an extra 10% with code <span class="code">10OFF</span> at checkout.</p>
+            <a href="products.html?filter=sale" class="btn btn-light" id="promoLink">Shop the sale &#8594;</a>
+        </div>
+    </div>
+
+    <div class="categories">
+        <div class="small-container">
+            <div class="row">
+                <div class="col-3"><a href="products.html?filter=Clothing"><img src="images/category-1.jpg" alt="Clothing"></a></div>
+                <div class="col-3"><a href="products.html?filter=Footwear"><img src="images/category-2.jpg" alt="Footwear"></a></div>
+                <div class="col-3"><a href="products.html?filter=Accessories"><img src="images/category-3.jpg" alt="Accessories"></a></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="small-container">
+        <h2 class="title">Featured Products</h2>
+        <div class="row product-grid" id="featuredList"></div>
+
+        <h2 class="title">Latest Products</h2>
+        <div class="row product-grid" id="latestList"></div>
+    </div>
+
+    <div class="offer">
+        <div class="small-container">
+            <div class="row">
+                <div class="col-2">
+                    <img src="images/exclusive.png" class="offer-img" alt="Smart Band 4">
+                </div>
+                <div class="col-2">
+                    <p>Exclusively Available on RedStore</p>
+                    <h1>Smart Band 4</h1>
+                    <small>The Mi Smart Band 4 features a 39.9% larger (than Mi Band 3) AMOLED color full-touch display with adjustable brightness, so everything is clear as can be.</small><br>
+                    <a href="products.html?filter=Accessories" class="btn">Buy Now &#8594;</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="testimonial">
+        <div class="small-container">
+            <div class="row">
+                <div class="col-3">
+                    <i class="fas fa-quote-left"></i>
+                    <p>Best store I have ever shopped from. Speedy delivery and high quality goods! Hurrah!</p>
+                    <div class="rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
+                    <img src="images/user-1.png" alt="">
+                    <h3>Sarah Parker</h3>
+                </div>
+                <div class="col-3">
+                    <i class="fas fa-quote-left"></i>
+                    <p>I could not find the item that I was looking for anywhere, but thankfully this place came to my rescue!</p>
+                    <div class="rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                    <img src="images/user-2.png" alt="">
+                    <h3>David Healy</h3>
+                </div>
+                <div class="col-3">
+                    <i class="fas fa-quote-left"></i>
+                    <p>The only online shop I ever use.</p>
+                    <div class="rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
+                    <img src="images/user-3.png" alt="">
+                    <h3>Martin Guy</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="brands">
+        <div class="small-container">
+            <div class="row">
+                <div class="col-5"><img src="images/logo-godrej.png" alt="Godrej"></div>
+                <div class="col-5"><img src="images/logo-oppo.png" alt="Oppo"></div>
+                <div class="col-5"><img src="images/logo-coca-cola.png" alt="Coca-Cola"></div>
+                <div class="col-5"><img src="images/logo-paypal.png" alt="PayPal"></div>
+                <div class="col-5"><img src="images/logo-philips.png" alt="Philips"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="site-footer"></div>
+
+    <script>
+        (function () {
+            function byIds(ids) { return ids.map(RS.getProduct); }
+
+            RS.renderProductList(document.getElementById('featuredList'), byIds(RS.LISTS.featured.products), RS.LISTS.featured);
+            RS.renderProductList(document.getElementById('latestList'), byIds(RS.LISTS.latest.products), RS.LISTS.latest);
+
+            // Promotion: the sale banner features every product currently on sale
+            var promo = { promotion_id: 'summer_sale_10off', promotion_name: 'Summer Sale + 10OFF', creative_name: 'home_sale_banner', creative_slot: 'home_below_hero' };
+            var saleItems = RS.PRODUCTS.filter(function (p) { return p.originalPrice; })
+                .map(function (p, i) { return RS.dl.item(p, { index: i }); });
+
+            RS.dl.ecommerce('view_promotion', saleItems, promo);
+
+            document.getElementById('promoLink').addEventListener('click', function (e) {
+                var href = this.href;
+                e.preventDefault();
+                RS.dl.ecommerce('select_promotion', saleItems, promo, function () { window.location.href = href; });
+            });
+        })();
+    </script>
+</body>
+</html>

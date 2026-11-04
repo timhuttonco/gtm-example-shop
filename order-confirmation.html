@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmation | RedStore</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+
+    <script src="js/catalogue.js"></script>
+    <script src="js/site.js"></script>
+    <script>
+        RS.dl.pageData({ type: 'purchase', name: 'Order Confirmation' });
+    </script>
+
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-MXQ9HZ7R');</script>
+    <!-- End Google Tag Manager -->
+</head>
+<body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MXQ9HZ7R"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
+    <div class="container"><div id="site-nav"></div></div>
+
+    <div class="small-container cart-page" id="confirmation"></div>
+
+    <div id="site-footer"></div>
+
+    <script>
+        (function () {
+            var el = document.getElementById('confirmation');
+            var order = RS.session('rs_last_order');
+
+            if (!order) {
+                el.innerHTML = '<h2>No recent order</h2><p class="empty">We couldn\'t find a recent order. Return to <a href="products.html">products</a> to start shopping.</p>';
+                return;
+            }
+
+            var s = RS.cart.summarise(order.lines, order.coupon, order.shipping_key);
+
+            el.innerHTML =
+                '<h1>Thank you for your purchase!</h1>' +
+                '<p>Order number <strong id="transactionId">' + RS.escape(order.transaction_id) + '</strong> &middot; ' +
+                    RS.SHIPPING[order.shipping_key].label + ' &middot; ' + RS.escape(order.payment_type) + '</p>' +
+                '<table class="cart-table">' +
+                    '<thead><tr><th>Product</th><th>Quantity</th><th>Subtotal</th></tr></thead>' +
+                    '<tbody>' + s.lines.map(function (l) {
+                        return '<tr data-item-id="' + l.product.id + '">' +
+                            '<td><div class="cart-info"><img src="' + l.product.image + '" alt=""><div>' +
+                                '<p>' + RS.escape(l.product.name) + '</p>' +
+                                '<small>Size ' + RS.escape(l.size) + ' &middot; Price <span class="js-unit-price">' + RS.money(l.unitPrice) + '</span></small>' +
+                            '</div></div></td>' +
+                            '<td>' + l.quantity + '</td>' +
+                            '<td>' + RS.money(l.lineTotal) + '</td>' +
+                        '</tr>';
+                    }).join('') + '</tbody>' +
+                '</table>' +
+                '<div class="total-price"><table>' +
+                    '<tr><td>Subtotal</td><td>' + RS.money(s.subtotal) + '</td></tr>' +
+                    (s.coupon ? '<tr class="discount"><td>Discount (' + s.coupon + ')</td><td>&minus;' + RS.money(s.discount) + '</td></tr>' : '') +
+                    '<tr><td>Tax (' + RS.TAX_RATE * 100 + '%)</td><td>' + RS.money(s.tax) + '</td></tr>' +
+                    '<tr><td>Delivery</td><td>' + (s.shipping ? RS.money(s.shipping) : 'Free') + '</td></tr>' +
+                    '<tr class="grand-total"><td>Total</td><td data-order-total>' + RS.money(s.total) + '</td></tr>' +
+                    '<tr><td colspan="2"><a class="btn btn-block" href="products.html">Continue shopping</a></td></tr>' +
+                '</table></div>';
+
+            // purchase - only once per order, so a page refresh doesn't duplicate revenue
+            if (order.tracked) return;
+
+            var items = s.lines.map(function (l) {
+                return RS.dl.item(l.product, { quantity: l.quantity, size: l.size, coupon: s.coupon });
+            });
+            var extra = {
+                transaction_id: order.transaction_id,
+                tax: s.tax,
+                shipping: s.shipping,
+                customer_type: order.customer_type
+            };
+            if (s.coupon) extra.coupon = s.coupon;
+            RS.dl.ecommerce('purchase', items, extra);
+
+            order.tracked = true;
+            RS.session('rs_last_order', order);
+        })();
+    </script>
+</body>
+</html>

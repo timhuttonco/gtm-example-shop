@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Products | RedStore</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+
+    <script src="js/catalogue.js"></script>
+    <script src="js/site.js"></script>
+    <script>
+        RS.dl.pageData({ type: 'category', name: 'All Products' });
+    </script>
+
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-MXQ9HZ7R');</script>
+    <!-- End Google Tag Manager -->
+</head>
+<body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MXQ9HZ7R"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
+    <div class="container"><div id="site-nav"></div></div>
+
+    <div class="small-container">
+        <div class="row row-2">
+            <h2 id="listTitle">All Products</h2>
+            <div class="list-controls">
+                <label>Show
+                    <select id="filter">
+                        <option value="">All products</option>
+                        <option value="sale">On sale</option>
+                        <option value="Clothing">Clothing</option>
+                        <option value="Footwear">Footwear</option>
+                        <option value="Accessories">Accessories</option>
+                    </select>
+                </label>
+                <label>Sort
+                    <select id="sort">
+                        <option value="">Default sorting</option>
+                        <option value="price-asc">Price: low to high</option>
+                        <option value="price-desc">Price: high to low</option>
+                        <option value="rating">Rating</option>
+                        <option value="name">Name</option>
+                    </select>
+                </label>
+            </div>
+        </div>
+
+        <div class="row product-grid" id="productList"></div>
+    </div>
+
+    <div id="site-footer"></div>
+
+    <script>
+        (function () {
+            var filterEl = document.getElementById('filter');
+            var sortEl = document.getElementById('sort');
+            var sorters = {
+                'price-asc': function (a, b) { return a.price - b.price; },
+                'price-desc': function (a, b) { return b.price - a.price; },
+                'rating': function (a, b) { return b.rating - a.rating; },
+                'name': function (a, b) { return a.name.localeCompare(b.name); }
+            };
+
+            function render() {
+                var filter = filterEl.value;
+                var products = RS.PRODUCTS.filter(function (p) {
+                    if (!filter) return true;
+                    if (filter === 'sale') return !!p.originalPrice;
+                    return p.category === filter;
+                });
+                if (sorters[sortEl.value]) products = products.slice().sort(sorters[sortEl.value]);
+
+                var label = filterEl.options[filterEl.selectedIndex].text;
+                document.getElementById('listTitle').textContent = filter ? label : 'All Products';
+
+                // Same list id every time; the name tells you which filter was used
+                var list = { id: RS.LISTS.all.id, name: filter ? 'All Products - ' + label : RS.LISTS.all.name };
+                RS.renderProductList(document.getElementById('productList'), products, list);
+            }
+
+            var initial = RS.param('filter');
+            if (initial && filterEl.querySelector('option[value="' + initial + '"]')) filterEl.value = initial;
+
+            filterEl.addEventListener('change', render);
+            sortEl.addEventListener('change', render);
+            render();
+        })();
+    </script>
+</body>
+</html>

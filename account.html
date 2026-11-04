@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account | RedStore</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+
+    <script src="js/catalogue.js"></script>
+    <script src="js/site.js"></script>
+    <script>
+        RS.dl.pageData({ type: 'account', name: 'Account' });
+    </script>
+
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-MXQ9HZ7R');</script>
+    <!-- End Google Tag Manager -->
+</head>
+<body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MXQ9HZ7R"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
+    <div class="container"><div id="site-nav"></div></div>
+
+    <div class="account-page">
+        <div class="container">
+            <div class="row">
+                <div class="col-2">
+                    <img src="images/image1.png" width="100%" alt="">
+                </div>
+                <div class="col-2">
+                    <div class="form-container" id="accountForms">
+                        <div class="form-btn">
+                            <span id="showLogin">Login</span>
+                            <span id="showRegister">Register</span>
+                            <hr id="Indicator">
+                        </div>
+                        <!-- No validation on purpose: any (or no) details will log you in -->
+                        <form id="LoginForm">
+                            <input type="text" id="username" placeholder="Username" autocomplete="username">
+                            <input type="password" placeholder="Password" autocomplete="current-password">
+                            <button type="submit" class="btn">Login</button>
+                            <a href="#">Forgot Password</a>
+                        </form>
+                        <form id="RegForm">
+                            <input type="text" id="newusername" placeholder="Username" autocomplete="username">
+                            <input type="email" placeholder="Email" autocomplete="email">
+                            <input type="password" placeholder="Password" autocomplete="new-password">
+                            <button type="submit" class="btn">Register</button>
+                        </form>
+                    </div>
+
+                    <div class="form-container logged-in" id="accountInfo" hidden>
+                        <h3>Hi, <span id="accountName"></span></h3>
+                        <p>Customer number <strong id="accountId"></strong></p>
+                        <p class="note">This is the anonymous ID sent to GA4 as the User-ID.</p>
+                        <a href="products.html" class="btn">Start shopping</a>
+                        <button type="button" class="btn btn-light" id="accountLogout">Log out</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="site-footer"></div>
+
+    <script>
+        (function () {
+            var user = RS.user.get();
+            if (user) {
+                document.getElementById('accountForms').hidden = true;
+                document.getElementById('accountInfo').hidden = false;
+                document.getElementById('accountName').textContent = user.username;
+                document.getElementById('accountId').textContent = user.user_id;
+                document.getElementById('accountLogout').addEventListener('click', function () {
+                    RS.user.signOut();
+                    RS.dl.pushThen({ event: 'logout' }, function () { window.location.href = 'account.html'; });
+                });
+                return;
+            }
+
+            var loginForm = document.getElementById('LoginForm');
+            var regForm = document.getElementById('RegForm');
+            var indicator = document.getElementById('Indicator');
+
+            document.getElementById('showRegister').addEventListener('click', function () {
+                regForm.style.transform = 'translateX(0px)';
+                loginForm.style.transform = 'translateX(0px)';
+                indicator.style.transform = 'translateX(100px)';
+            });
+            document.getElementById('showLogin').addEventListener('click', function () {
+                regForm.style.transform = 'translateX(300px)';
+                loginForm.style.transform = 'translateX(300px)';
+                indicator.style.transform = 'translateX(0px)';
+            });
+
+            function complete(event, username, isNew) {
+                var u = RS.user.signIn(username, isNew);
+                RS.dl.pushThen({
+                    event: event,
+                    method: 'email',
+                    user: { login_status: 'logged_in', user_id: u.user_id }
+                }, function () { window.location.href = 'account.html'; });
+            }
+
+            loginForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                complete('login', document.getElementById('username').value.trim(), false);
+            });
+            regForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                complete('sign_up', document.getElementById('newusername').value.trim(), true);
+            });
+        })();
+    </script>
+</body>
+</html>

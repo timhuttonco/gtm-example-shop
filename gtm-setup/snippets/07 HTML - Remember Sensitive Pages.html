@@ -1,0 +1,18 @@
+<!--
+  GTM Tag: "HTML - Remember Sensitive Pages"  (type: Custom HTML)
+  Trigger: "Init - Sensitive Page" (Initialization, DLV - page.sensitive_content equals true)
+
+  After viewing the sensitive product, the NEXT page's document.referrer is
+  the sensitive URL (with ?id=THP007). This remembers sensitive URLs for the
+  session so "CJS - Safe Page Referrer" can redact them.
+-->
+<script>
+  (function () {
+    try {
+      var key = 'gtm_sensitive_urls';
+      var urls = JSON.parse(sessionStorage.getItem(key) || '[]');
+      if (urls.indexOf(location.href) === -1) urls.push(location.href);
+      sessionStorage.setItem(key, JSON.stringify(urls.slice(-50)));
+    } catch (e) {}
+  })();
+</script>

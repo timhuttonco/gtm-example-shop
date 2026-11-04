@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Details | RedStore</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+
+    <script src="js/catalogue.js"></script>
+    <script src="js/site.js"></script>
+    <script>
+        // product-details.html?id=THP001 - falls back to the first product
+        RS.product = RS.getProduct(RS.param('id')) || RS.PRODUCTS[0];
+        if (RS.param('id') !== RS.product.id) {
+            history.replaceState(null, '', 'product-details.html?id=' + RS.product.id);
+        }
+        document.title = RS.product.name + ' | RedStore';
+        RS.dl.pageData({ type: 'product', name: 'Product Details', sensitive_content: RS.product.sensitive });
+    </script>
+
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-MXQ9HZ7R');</script>
+    <!-- End Google Tag Manager -->
+</head>
+<body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MXQ9HZ7R"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
+    <div class="container"><div id="site-nav"></div></div>
+
+    <div class="small-container single-product">
+        <div class="row" id="productDetail">
+            <div class="col-2">
+                <img src="" width="100%" id="productImg" alt="">
+                <div class="small-img-row" id="thumbs"></div>
+            </div>
+            <div class="col-2">
+                <p class="breadcrumb"><a href="index.html">Home</a> / <a href="#" id="crumbCategory"></a></p>
+                <h1 id="productName"></h1>
+                <!-- GTM reads .product-price .js-unit-price to validate the data layer price -->
+                <h4 class="product-price" id="productPrice"></h4>
+                <form id="addToCartForm">
+                    <label for="selectSize" class="visually-hidden">Size</label>
+                    <select id="selectSize"></select>
+                    <label for="quantity" class="visually-hidden">Quantity</label>
+                    <input type="number" value="1" min="1" max="10" id="quantity">
+                    <button type="submit" class="btn" id="addToCart">Add To Cart</button>
+                </form>
+                <h3>Product Details <i class="fas fa-indent"></i></h3>
+                <br>
+                <p id="productDescription"></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="small-container">
+        <div class="row row-2">
+            <h2>Related Products</h2>
+            <p><a href="products.html">View More</a></p>
+        </div>
+    </div>
+
+    <div class="small-container">
+        <div class="row product-grid" id="relatedList"></div>
+    </div>
+
+    <div id="site-footer"></div>
+
+    <script>
+        (function () {
+            var p = RS.product;
+
+            // Render the product. data-item-id + .js-unit-price is the hook GTM
+            // uses to read the on-page price for any item on any page.
+            document.getElementById('productDetail').dataset.itemId = p.id;
+            var img = document.getElementById('productImg');
+            img.src = p.image;
+            img.alt = p.name;
+            document.getElementById('productName').textContent = p.name;
+            document.getElementById('productPrice').innerHTML = RS.priceHtml(p) +
+                (p.originalPrice ? ' <span class="badge-sale inline">Save ' + RS.money(p.originalPrice - p.price) + '</span>' : '');
+            document.getElementById('productDescription').textContent = p.description;
+            var crumb = document.getElementById('crumbCategory');
+            crumb.textContent = p.category;
+            crumb.href = 'products.html?filter=' + encodeURIComponent(p.category);
+
+            document.getElementById('selectSize').innerHTML = p.sizes.map(function (s) {
+                return '<option value="' + RS.escape(s) + '">' + RS.escape(s) + '</option>';
+            }).join('');
+
+            var thumbs = [p.image, 'images/gallery-1.jpg', 'images/gallery-2.jpg', 'images/gallery-3.jpg'];
+            var thumbRow = document.getElementById('thumbs');
+            thumbRow.innerHTML = thumbs.map(function (src) {
+                return '<div class="small-img-col"><img src="' + src + '" width="100%" class="small-img" alt=""></div>';
+            }).join('');
+            thumbRow.addEventListener('click', function (e) {
+                if (e.target.classList.contains('small-img')) img.src = e.target.src;
+            });
+
+            // view_item - pushed after the price is on the page so GTM can check it
+            RS.dl.ecommerce('view_item', [RS.dl.item(p)]);
+
+            // add_to_cart
+            document.getElementById('addToCartForm').addEventListener('submit', function (e) {
+                e.preventDefault();
+                var qty = parseInt(document.getElementById('quantity').value, 10);
+                if (!(qty >= 1)) qty = 1;
+                var size = document.getElementById('selectSize').value;
+                var added = RS.cart.add(p.id, size, qty);
+
+                if (!added) {
+                    var msg = 'You can add up to ' + RS.MAX_QTY + ' of each item';
+                    RS.toast(msg);
+                    RS.dl.error('add_to_cart', msg);
+                    return;
+                }
+                RS.dl.ecommerce('add_to_cart', [RS.dl.item(p, { quantity: added, size: size })]);
+                RS.toast('Added ' + added + ' &times; ' + RS.escape(p.name) + ' (' + RS.escape(size) + ') to your cart. <a href="cart.html">View cart &#8594;</a>');
+            });
+
+            // Related products: same category first, then anything else
+            var related = RS.PRODUCTS.filter(function (o) { return o.id !== p.id && o.category === p.category; })
+                .concat(RS.PRODUCTS.filter(function (o) { return o.id !== p.id && o.category !== p.category; }))
+                .slice(0, 4);
+            RS.renderProductList(document.getElementById('relatedList'), related, RS.LISTS.related);
+        })();
+    </script>
+</body>
+</html>

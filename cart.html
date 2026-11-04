@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart | RedStore</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+
+    <script src="js/catalogue.js"></script>
+    <script src="js/site.js"></script>
+    <script>
+        RS.dl.pageData({ type: 'cart', name: 'Cart' });
+    </script>
+
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-MXQ9HZ7R');</script>
+    <!-- End Google Tag Manager -->
+</head>
+<body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MXQ9HZ7R"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
+    <div class="container"><div id="site-nav"></div></div>
+
+    <div class="small-container cart-page">
+        <h2>Your Cart</h2>
+        <div id="cartContent"></div>
+    </div>
+
+    <div id="site-footer"></div>
+
+    <script>
+        (function () {
+            var content = document.getElementById('cartContent');
+
+            function lineItem(line) {
+                return RS.dl.item(line.product, { quantity: line.quantity, size: line.size, coupon: RS.cart.get().coupon });
+            }
+
+            function render() {
+                var cart = RS.cart.get();
+                var s = RS.cart.summarise(cart.lines, cart.coupon);
+
+                if (!s.lines.length) {
+                    content.innerHTML = '<p class="empty">Your cart is empty. Return to <a href="products.html">products</a> to start shopping.</p>';
+                    return s;
+                }
+
+                content.innerHTML =
+                    '<table class="cart-table">' +
+                        '<thead><tr><th>Product</th><th>Quantity</th><th>Subtotal</th></tr></thead>' +
+                        '<tbody>' + s.lines.map(function (l, i) {
+                            var p = l.product;
+                            return '<tr data-item-id="' + p.id + '" data-line="' + i + '">' +
+                                '<td><div class="cart-info">' +
+                                    '<a href="product-details.html?id=' + p.id + '"><img src="' + p.image + '" alt=""></a>' +
+                                    '<div>' +
+                                        '<p><a href="product-details.html?id=' + p.id + '">' + RS.escape(p.name) + '</a></p>' +
+                                        '<small>Size ' + RS.escape(l.size) + ' &middot; Price <span class="js-unit-price">' + RS.money(l.unitPrice) + '</span>' +
+                                            (p.originalPrice || s.coupon ? ' <s>' + RS.money(p.originalPrice || p.price) + '</s>' : '') + '</small><br>' +
+                                        '<button type="button" class="link-btn js-remove">Remove</button>' +
+                                    '</div>' +
+                                '</div></td>' +
+                                '<td><div class="qty-control">' +
+                                    '<button type="button" class="js-qty" data-delta="-1" aria-label="Decrease quantity">&minus;</button>' +
+                                    '<span>' + l.quantity + '</span>' +
+                                    '<button type="button" class="js-qty" data-delta="1" aria-label="Increase quantity">+</button>' +
+                                '</div></td>' +
+                                '<td>' + RS.money(l.lineTotal) + '</td>' +
+                            '</tr>';
+                        }).join('') + '</tbody>' +
+                    '</table>' +
+                    '<div class="total-price"><table>' +
+                        '<tr><td>Subtotal</td><td>' + RS.money(s.subtotal) + '</td></tr>' +
+                        (s.coupon ? '<tr class="discount"><td>Discount (' + s.coupon + ')</td><td>&minus;' + RS.money(s.discount) + '</td></tr>' : '') +
+                        '<tr><td>Tax (' + RS.TAX_RATE * 100 + '%)</td><td>' + RS.money(s.tax) + '</td></tr>' +
+                        '<tr class="grand-total"><td>Total</td><td data-order-total>' + RS.money(s.total) + '</td></tr>' +
+                        '<tr><td colspan="2" class="note">' + (s.coupon ? '' : 'Have a discount code? Add it at checkout.') + '</td></tr>' +
+                        '<tr><td colspan="2"><a class="btn btn-block" href="checkout.html" id="checkout">Checkout</a></td></tr>' +
+                    '</table></div>';
+                return s;
+            }
+
+            function changeLine(index, newQty) {
+                var result = RS.cart.setQuantity(index, newQty);
+                if (!result || !result.delta) {
+                    if (result) RS.toast('You can add up to ' + RS.MAX_QTY + ' of each item');
+                    return;
+                }
+                var item = RS.dl.item(RS.getProduct(result.line.id), { quantity: Math.abs(result.delta), size: result.line.size, coupon: RS.cart.get().coupon });
+                RS.dl.ecommerce(result.delta > 0 ? 'add_to_cart' : 'remove_from_cart', [item]);
+                render();
+            }
+
+            content.addEventListener('click', function (e) {
+                var row = e.target.closest('tr[data-line]');
+                if (!row) return;
+                var index = Number(row.dataset.line);
+                var line = RS.cart.get().lines[index];
+                if (e.target.closest('.js-remove')) changeLine(index, 0);
+                else if (e.target.closest('.js-qty')) changeLine(index, line.quantity + Number(e.target.closest('.js-qty').dataset.delta));
+            });
+
+            var s = render();
+            if (s.lines.length) RS.dl.ecommerce('view_cart', s.lines.map(lineItem), s.coupon ? { coupon: s.coupon } : {});
+        })();
+    </script>
+</body>
+</html>
